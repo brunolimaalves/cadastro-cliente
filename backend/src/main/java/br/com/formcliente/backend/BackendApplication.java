@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"br.com.formcliente.backend", "br.com.formcliente.backend.infra.mapper"})
 public class BackendApplication {
 
     public static void main(String[] args) {
