@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
-import Clientes from "./pages/Clientes";
-import ClienteForm from "./pages/ClienteForm";
+import Clientes from "./pages/Cliente/Clientes";
+import ClienteForm from "./pages/Cliente/ClienteForm";
 
 const App = () => {
   return (

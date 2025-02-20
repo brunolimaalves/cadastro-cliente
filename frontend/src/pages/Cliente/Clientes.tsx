@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import { Alert, Button, Snackbar, Typography } from '@mui/material';
-import { Cliente, useClienteService } from '../service/clienteService';
+import { Cliente, useClienteService } from '../../service/clienteService';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 
@@ -34,15 +34,17 @@ const Clientes = () => {
     const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
     const [openSnackbar, setOpenSnackbar] = useState(false); 
 
-
     const { list, deleteById } = useClienteService()
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
 
     useEffect( () => {
         async function init() {
-            const { data: { content } } = await list({ });
-            setClientes(content)
+            try {
+                const { data: { content } } = await list();
+                setClientes(content)    
+            } catch (error) {
+                console.log(error)
+            }
         }
         
         init();
@@ -53,11 +55,19 @@ const Clientes = () => {
         navigate("/cadastro")
     }
 
-    const deleteCliente =  async (id: number) => {
-        await deleteById(id);
-        const novaLista = clientes.filter( cliente => cliente.id !== id)
-        setClientes(novaLista)
-        setOpenSnackbar(true); 
+    const onEditCliente = () => {
+        navigate(`/cadastro/${selectedCliente?.id}`, { state: { cliente: selectedCliente } })
+    }
+
+    const onDeleteCliente =  async (id: number) => {
+        try {
+            await deleteById(id);
+            const novaLista = clientes.filter( cliente => cliente.id !== id)
+            setClientes(novaLista)
+            setOpenSnackbar(true);    
+        } catch (error) {
+            console.log(error)
+        }
     }
 
   return (
@@ -69,7 +79,7 @@ const Clientes = () => {
     <Button
         variant="contained"
         color="secondary"
-        onClick={() => navigate(`/cadastro/${selectedCliente?.id}`, { state: { cliente: selectedCliente } })}
+        onClick={onEditCliente}
         disabled={!selectedCliente}
         sx={{ mt: 2, mb: 2, ml: 2 }}
       >
@@ -78,7 +88,7 @@ const Clientes = () => {
     <Button
         variant="contained"
         color="error"
-        onClick={ () => deleteCliente( Number(selectedCliente?.id))}
+        onClick={ () => onDeleteCliente( Number(selectedCliente?.id))}
         disabled={!selectedCliente}
     sx={{ mt: 2, mb: 2, ml: 2 }}
     >
@@ -89,7 +99,7 @@ const Clientes = () => {
             rows={clientes}
             columns={headers}
             initialState={{ pagination: { paginationModel } }}
-            pageSizeOptions={[21, 10]}
+            pageSizeOptions={[5, 10]}
             checkboxSelection={false}
             sx={{ border: 0 }}
             onRowSelectionModelChange={(ids) => {

@@ -2,11 +2,11 @@ import { useCallback } from "react";
 import api from "./api";
 
 export interface Cliente {
-    id: number;
+    id?: number; 
     nome: string;
-    email: string;
     cpf: string;
-    observacao: string;
+    email: string;
+    observacao?: string;
     cor: string;
   }
   
@@ -14,15 +14,15 @@ const path = "/clientes"
 
 export const useClienteService = () => {
     
-    const list = useCallback(async ({ params }: any) => {
-        return api.get(path, params );
+    const list = useCallback(async () => {
+        return api.get(path);
     }, []);
 
-    const post = useCallback(async ( data: any) => {
+    const post = useCallback(async ( data: Cliente) => {
         return api.post(`${path}`, { ...data });
     }, []);
 
-    const update = useCallback(async ( data: any, id: number) => {
+    const update = useCallback(async ( data: Cliente, id: number) => {
         return api.put(`${path}/${id}`, { ...data });
     }, []);
 

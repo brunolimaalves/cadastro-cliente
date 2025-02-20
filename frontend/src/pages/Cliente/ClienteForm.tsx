@@ -1,35 +1,15 @@
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { TextField, Button, Box, Typography, FormControl, InputLabel, Select, MenuItem, Snackbar, Alert, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
-import InputMask from "react-input-mask";
-import { useClienteService } from "../service/clienteService";
+import { Cliente, useClienteService } from "../../service/clienteService";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-
-const schema = yup.object({
-  nome: yup.string().required("Nome é obrigatório").min(3, "O nome deve ter pelo menos 3 caracteres"),
-  email: yup.string().email("Email inválido").required("Email é obrigatório"),
-  observacao: yup.string().optional(),
-  cor: yup.string().required("Selecione uma cor"),
-  cpf: yup
-    .string()
-    .required("CPF é obrigatório")
-    .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "Formato de CPF inválido"),
-});
-
-type FormData = {
-  id?: number; 
-  nome: string;
-  cpf: string;
-  email: string;
-  observacao?: string;
-  cor: string;
-};
+import schemaValidation from './schema'
 
 const ClienteForm = () => {
     
     const { id } = useParams();
+    const clienteId = Number(id)
     const location = useLocation(); 
     const { post, update } = useClienteService()
     const clienteSelecionado = location.state?.cliente; 
@@ -44,8 +24,8 @@ const ClienteForm = () => {
         handleSubmit,
         formState: { errors },
         reset
-    } = useForm<FormData>({
-        resolver: yupResolver(schema),
+    } = useForm<Cliente>({
+        resolver: yupResolver(schemaValidation),
         defaultValues: clienteSelecionado || {
             nome: "",
             cpf: "",
@@ -55,10 +35,10 @@ const ClienteForm = () => {
         }
     });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: Cliente) => {
     try {
         setLoading(true);
-        const promise = !id ? post(data) : update(data, Number(id))
+        const promise = !clienteId ? post(data) : update(data, clienteId)
         await promise
         reset();
         setOpenSnackbar(true); 
@@ -106,6 +86,7 @@ const ClienteForm = () => {
             {...field}
             label="CPF"
             variant="outlined"
+            inputProps={{ maxLength: 14}} 
             error={!!errors.cpf}
             helperText={errors.cpf?.message}
             fullWidth
@@ -165,7 +146,7 @@ const ClienteForm = () => {
       />
 
       <Button type="submit" variant="contained" color="primary">
-      {loading ? <CircularProgress size={24} color="inherit" /> : !id ? 'Cadastrar' : 'Atualizar'}
+      {loading ? <CircularProgress size={24} color="inherit" /> : !clienteId ? 'Cadastrar' : 'Atualizar'}
       </Button>
 
       <Button type="button" variant="contained" color="primary" onClick={ () => navigate("/clientes")}>
@@ -174,7 +155,7 @@ const ClienteForm = () => {
 
       <Snackbar open={openSnackbar} autoHideDuration={4000} onClose={() => setOpenSnackbar(false)}>
         <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: "100%" }}>
-        {`Cadastro ${!id ? 'cadastrado' : 'atualizado'} com sucesso`}
+        {`Cadastro ${!clienteId ? 'cadastrado' : 'atualizado'} com sucesso`}
         </Alert>
       </Snackbar>
 
